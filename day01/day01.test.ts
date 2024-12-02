@@ -1,31 +1,66 @@
-import { getInputLines, getDayExampleInputFile, getDayInputFile } from "../utils";
+import { getDayExampleInputFile, getDayInputFile } from "../utils";
 
 const day = "day01";
 
-function partOne(input: string[]) {
+function parseInput(input: string[]): { listA: number[], listB: number[] } {
     // map input to 2 lists
     // sort lists
-    // calculate distance
-    // total distances
     const listA: number [] = [];
     const listB: number [] = [];
     input.map(line => {
-        const ab: string [] = line.split(' ')
-            .filter(i => i.length > 0)
-            .map(i => i.trim());
-        listA.push(Number.parseInt(ab[0]));
-        listB.push(Number.parseInt(ab[1]));
+        const match =  /(\d+)\s*(\d+)/.exec(line);
+        if(match) {
+            listA.push(Number.parseInt(match[1]));
+            listB.push(Number.parseInt(match[2]));
+        }
     });
 
     listA.sort((a, b) => a - b);
     listB.sort((a, b) => a - b);
 
+    return {
+        listA,
+        listB
+    }
+}
+
+function partOne(input: string[]): number {
+    const { listA, listB } = parseInput(input);
+    // calculate distance
+    // total distances
     return listA.reduce((acc, val, idx) => {
         return acc + Math.abs(val - listB[idx]);
+    }, 0);
+}
+
+const scoreCache: Map<number, number> = new Map();
+function calculateScore(find: number, list: number[]): number {
+    if(!scoreCache.has(find)) {
+        const score = list.reduce((acc, val) => {
+            if(val === find) {
+                return acc += find;
+            } else {
+                return acc;
+            }
+        }, 0);
+        scoreCache.set(find, score);
+    }
+    return scoreCache.get(find) as number;
+}
+
+function partTwo(input: string[]): number {
+    const { listA, listB } = parseInput(input);
+    // calculate similarity scores
+    // total distances
+    return listA.reduce((acc, val) => {
+        return acc + calculateScore(val, listB);
     }, 0);
 }
 
 test(day, () => { 
     expect(partOne(getDayExampleInputFile(day, 1))).toBe(11);
     expect(partOne(getDayInputFile(day))).toBe(2031679);
+
+    expect(partTwo(getDayExampleInputFile(day, 1))).toBe(31);
+    expect(partTwo(getDayInputFile(day))).toBe(19678534);
 });
