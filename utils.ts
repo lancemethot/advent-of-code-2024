@@ -5,11 +5,11 @@ export function getInputLines(inputFile: string): string [] {
     return input.split("\n");
 }
 
-export function getDayExampleInputFile(day: string, part?: number): string [] {
+export function getExampleInput(day: string, part?: number): string [] {
     return getInputLines(`./${day}/${day}-example${part ? `-${part}` : ''}.txt`);
 }
 
-export function getDayInputFile(day: string, part?: number): string [] {
+export function getDayInput(day: string, part?: number): string [] {
     return getInputLines(`./${day}/${day}-input${part ? `-${part}` : ''}.txt`);
 }
 

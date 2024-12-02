@@ -1,4 +1,4 @@
-import { getDayExampleInputFile, getDayInputFile } from "../utils";
+import { getExampleInput, getDayInput } from "../utils";
 
 const day = "day01";
 
@@ -58,9 +58,9 @@ function partTwo(input: string[]): number {
 }
 
 test(day, () => { 
-    expect(partOne(getDayExampleInputFile(day, 1))).toBe(11);
-    expect(partOne(getDayInputFile(day))).toBe(2031679);
+    expect(partOne(getExampleInput(day))).toBe(11);
+    expect(partOne(getDayInput(day))).toBe(2031679);
 
-    expect(partTwo(getDayExampleInputFile(day, 1))).toBe(31);
-    expect(partTwo(getDayInputFile(day))).toBe(19678534);
+    expect(partTwo(getExampleInput(day))).toBe(31);
+    expect(partTwo(getDayInput(day))).toBe(19678534);
 });
