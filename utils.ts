@@ -5,12 +5,12 @@ export function getInputLines(inputFile: string): string [] {
     return input.split("\n");
 }
 
-export function getSmallInput(day: string, part?: number): string [] {
-    return getInputLines(`./${day}/${day}-small${part ? `-${part}` : ''}.txt`);
+export function getDayExampleInputFile(day: string, part?: number): string [] {
+    return getInputLines(`./${day}/${day}-example${part ? `-${part}` : ''}.txt`);
 }
 
-export function getFullInput(day: string, part?: number): string [] {
-    return getInputLines(`./${day}/${day}-full${part ? `-${part}` : ''}.txt`);
+export function getDayInputFile(day: string, part?: number): string [] {
+    return getInputLines(`./${day}/${day}-input${part ? `-${part}` : ''}.txt`);
 }
 
 export function removeEmptyLines(lines: string[]): string[] {
