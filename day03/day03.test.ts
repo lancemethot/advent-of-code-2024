@@ -24,17 +24,15 @@ function partOne(input: string[]): number {
     }, 0);
 }
 
-// if enabled, find up to the next don't()
-// if disabled, find up to the next do()
-// only add when enabled, ignore when disabled
-
-
 function partTwo(input: string[]): number {
     let check = input.join('');
     let index = 0;
     let isEnabled = true;
-    let nextDont = check.length;
     let total = 0;
+
+    // if enabled, find up to the next don't()
+    // if disabled, find up to the next do()
+    // only add when enabled, ignore when disabled
 
     while(true) {
         if(isEnabled) {
