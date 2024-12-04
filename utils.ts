@@ -16,3 +16,11 @@ export function getDayInput(day: string, part?: number): string [] {
 export function removeEmptyLines(lines: string[]): string[] {
     return lines.filter((line) => line.trim().length > 0);
 }
+
+export function debug(message: string, filename: string, append: boolean = true) {
+    if(append) {
+        fs.appendFileSync(filename, message);
+    } else {
+        fs.writeFileSync(filename, message);
+    }
+}
