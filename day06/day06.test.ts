@@ -1,4 +1,4 @@
-import { debug, getDayInput, getExampleInput } from '../utils';
+import { getDayInput, getExampleInput } from '../utils';
 
 const day = "day06";
 
@@ -7,6 +7,7 @@ const directions = "^>v<";
 type Tile = {
     symbol: string;
     visited: number;
+    start: boolean;
     exit: boolean;
 }
 
@@ -21,6 +22,7 @@ function parseInput(input: string[]): Tile[][] {
             return {
                 symbol: t,
                 visited: 0,
+                start: directions.includes(t),
                 exit: false,
             }
         }));
@@ -31,8 +33,7 @@ function parseInput(input: string[]): Tile[][] {
 function findStart(tiles: Tile[][]): Coord {
     for(let x = 0; x < tiles.length; x++) {
         for(let y = 0; y < tiles[x].length; y++) {
-            let symbol = tiles[x][y].symbol;
-            if(directions.indexOf(symbol) !== -1) {
+            if(tiles[x][y].start) {
                 return { x, y };
             }
         }
@@ -91,23 +92,20 @@ function traverse(tiles: Tile[][], start: Coord): Tile[][] {
         }
 
         // move forward
-        location.x = next.x;
-        location.y = next.y;
+        location = next;
     }
     return tiles;
 }
 
 function reachedExit(tiles: Tile[][]): boolean {
     return tiles.reduce((acc, row, rowIndex) => {
-        let rowcheck = false;
         if(rowIndex === 0 || rowIndex === tiles.length - 1) {
             // anything in first or last rows
-            rowcheck = row.filter(col => col.exit).length > 0;
+            return acc || row.filter(col => col.exit).length > 0;
         } else {
             // anything in first or last column
-            rowcheck = row[0].exit || row[row.length - 1].exit;
+            return acc || row[0].exit || row[row.length - 1].exit;
         }
-        return acc || rowcheck;
     }, false);
 }
 
@@ -122,20 +120,19 @@ function partOne(input: string[]): number {
 function partTwo(input: string[]): number {
     const tiles = parseInput(input);
     const start = findStart(tiles);
+    // walk initial path to get list of visited tiles
     const potentialObstacles: Coord[] = traverse(tiles, start).reduce((acc, row, x) => {
         row.forEach((col, y) => {
             if(col.visited > 0) acc.push({ x, y });
         });
         return acc;
     }, [] as Coord[]);
-
+    // swap each visited with an obstacle and see if it loops
     return potentialObstacles.filter(obstacle => {
         const freshTiles = parseInput(input);
-        const newStart = findStart(freshTiles);
+        const freshStart = findStart(freshTiles);
         freshTiles[obstacle.x][obstacle.y].symbol = '#';
-        const newPath = traverse(freshTiles, newStart);
-        let exited = reachedExit(newPath);
-        return !exited;
+        return !reachedExit(traverse(freshTiles, freshStart));
     }).length;
 }
 
