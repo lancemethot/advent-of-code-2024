@@ -70,6 +70,7 @@ function isSolvableWithConcat(equation: Equation): boolean {
             } else {
                 sumOrProduct = Number.parseInt(`${sumOrProduct}${equation.numbers[i + 1]}`);
             }
+            if(sumOrProduct > equation.expect) break;
         }
         return sumOrProduct === equation.expect;
     }).length > 0;
