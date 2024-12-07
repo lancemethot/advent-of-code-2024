@@ -17,10 +17,10 @@ export function removeEmptyLines(lines: string[]): string[] {
     return lines.filter((line) => line.trim().length > 0);
 }
 
-export function debug(message: string, filename: string, append: boolean = true) {
+export function debug(message: string, day: string, append: boolean = true) {
     if(append) {
-        fs.appendFileSync(filename, message);
+        fs.appendFileSync(`${day}.debug`, message);
     } else {
-        fs.writeFileSync(filename, message);
+        fs.writeFileSync(`${day}.debug`, message);
     }
 }
