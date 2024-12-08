@@ -19,8 +19,8 @@ export function removeEmptyLines(lines: string[]): string[] {
 
 export function debug(message: string, day: string, append: boolean = true) {
     if(append) {
-        fs.appendFileSync(`${day}.debug`, message);
+        fs.appendFileSync(`${day}/${day}.debug`, message+'\n');
     } else {
-        fs.writeFileSync(`${day}.debug`, message);
+        fs.writeFileSync(`${day}/${day}.debug`, message);
     }
 }
