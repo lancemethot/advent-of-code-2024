@@ -1,4 +1,4 @@
-import { debug, getDayInput, getExampleInput } from '../utils';
+import { getDayInput, getExampleInput } from '../utils';
 
 const day = "day10";
 
@@ -15,8 +15,8 @@ function parseInput(input: string[]): Tile[][] {
     return input.reduce((acc, line) => {
         acc.push(line.split('').map(t => {
             return {
-                height: Number.parseInt(t)
-            } 
+                height: t === '.' ? Number.MAX_VALUE : Number.parseInt(t)
+            }
         }));
         return acc;
     }, [] as Tile[][]);
@@ -32,7 +32,7 @@ function findTrailheads(tiles: Tile[][]): Coord[] {
     }, [] as Coord[]);
 }
 
-function nextTile(tiles: Tile[][], position: Coord, direction: string): Coord {
+function nextTile(position: Coord, direction: string): Coord {
     let x = position.x;
     let y = position.y;
     switch(direction) {
@@ -46,10 +46,10 @@ function nextTile(tiles: Tile[][], position: Coord, direction: string): Coord {
 
 function nextMoves(tiles: Tile[][], position: Coord): Coord[] {
     return [
-        nextTile(tiles, position, '^'),
-        nextTile(tiles, position, 'v'),
-        nextTile(tiles, position, '>'),
-        nextTile(tiles, position, '<')
+        nextTile(position, '^'),
+        nextTile(position, 'v'),
+        nextTile(position, '>'),
+        nextTile(position, '<')
     ].filter(tile => isInBounds(tiles, tile))
      .filter(tile => tiles[tile.x][tile.y].height === tiles[position.x][position.y].height + 1);
 }
@@ -104,11 +104,16 @@ function partTwo(input: string[]): number {
 }
 
 test(day, () => {
-    debug(`${new Date()}\n`, day, false);
     expect(partOne(getExampleInput(day, 1))).toBe(1);
     expect(partOne(getExampleInput(day, 2))).toBe(36);
+    expect(partOne(getExampleInput(day, 3))).toBe(2);
+    expect(partOne(getExampleInput(day, 4))).toBe(4);
+    expect(partOne(getExampleInput(day, 5))).toBe(3);
     expect(partOne(getDayInput(day))).toBe(472);
 
     expect(partTwo(getExampleInput(day, 2))).toBe(81);
+    expect(partTwo(getExampleInput(day, 6))).toBe(3);
+    expect(partTwo(getExampleInput(day, 7))).toBe(13);
+    expect(partTwo(getExampleInput(day, 8))).toBe(227);
     expect(partTwo(getDayInput(day))).toBe(969);
 });
