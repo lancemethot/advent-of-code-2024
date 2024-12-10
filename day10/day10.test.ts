@@ -96,9 +96,19 @@ function partOne(input: string[]): number {
     }, 0);
 }
 
+function partTwo(input: string[]): number {
+    const tiles = parseInput(input);
+    return findTrailheads(tiles).reduce((acc, trailhead) => {
+        return acc += findTrails(tiles, trailhead).length;
+    }, 0);
+}
+
 test(day, () => {
     debug(`${new Date()}\n`, day, false);
     expect(partOne(getExampleInput(day, 1))).toBe(1);
     expect(partOne(getExampleInput(day, 2))).toBe(36);
     expect(partOne(getDayInput(day))).toBe(472);
+
+    expect(partTwo(getExampleInput(day, 2))).toBe(81);
+    expect(partTwo(getDayInput(day))).toBe(969);
 });
