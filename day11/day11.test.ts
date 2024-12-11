@@ -19,29 +19,38 @@ function parseInput(input: string[]): Stone[] {
     }, [] as Stone[]);
 }
 
+function removeLeadingZeroes(stone: Stone): Stone {
+    while(stone.engraving.startsWith('0') && stone.engraving !== '0') {
+        stone.engraving = stone.engraving.substring(1);
+    }
+    return stone;
+}
+
+function transmute(stone: Stone): Stone[] {
+    const transmuted: Stone[] = [];
+    if(stone.engraving === '0') {
+        transmuted.push({
+            engraving: '1'
+        });
+    } else if((stone.engraving.length % 2) === 0) {
+        transmuted.push({
+            engraving: stone.engraving.substring(0, stone.engraving.length / 2)
+        });
+        transmuted.push({
+            engraving: stone.engraving.substring(stone.engraving.length / 2)
+        })
+    } else {
+        transmuted.push({
+            engraving: String(Number.parseInt(stone.engraving) * 2024)
+        });
+    }
+    return transmuted.map(stone => removeLeadingZeroes(stone));
+}
+
 function blink(stones: Stone[]): Stone[] {
     const newStones: Stone[] = [];
     for(let i = 0; i < stones.length; i++) {
-        if(stones[i].engraving === '0') {
-            newStones.push({
-                engraving: '1'
-            });
-        } else if((stones[i].engraving.length % 2) === 0) {
-            newStones.push({
-                engraving: stones[i].engraving.substring(0, stones[i].engraving.length / 2)
-            });
-            newStones.push({
-                engraving: stones[i].engraving.substring(stones[i].engraving.length / 2)
-            })
-            let last = newStones.length - 1;
-            while(newStones[last].engraving.startsWith('0') && newStones[last].engraving !== '0') {
-                newStones[last].engraving = newStones[last].engraving.substring(1);
-            }
-        } else {
-            newStones.push({
-                engraving: String(Number.parseInt(stones[i].engraving) * 2024)
-            });
-        }
+        newStones.push( ...transmute(stones[i]));
     }
     return newStones;
 }
@@ -54,8 +63,19 @@ function partOne(input: string[]): number {
     return stones.length;
 }
 
+function partTwo(input: string[]): number {
+    let stones: Stone[] = parseInput(input);
+    for(let i = 0; i < 75; i++) {
+        stones = blink(stones);
+        debug(`Blink ${i + 1}: ${stones.length}`, day);
+    }
+    return stones.length;
+}
+
 test(day, ()=> {
     debug(`Day ${day}: ${new Date()}\n`, day, false);
     expect(partOne(getExampleInput(day))).toBe(55312);
     expect(partOne(getDayInput(day))).toBe(191690);
+
+    //expect(partTwo(getDayInput(day))).toBe(0);
 });
