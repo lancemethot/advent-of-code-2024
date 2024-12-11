@@ -26,25 +26,29 @@ function removeLeadingZeroes(stone: Stone): Stone {
     return stone;
 }
 
+const mutations: Map<string, Stone[]> = new Map<string, Stone[]>();
 function transmute(stone: Stone): Stone[] {
-    const transmuted: Stone[] = [];
-    if(stone.engraving === '0') {
-        transmuted.push({
-            engraving: '1'
-        });
-    } else if((stone.engraving.length % 2) === 0) {
-        transmuted.push({
-            engraving: stone.engraving.substring(0, stone.engraving.length / 2)
-        });
-        transmuted.push({
-            engraving: stone.engraving.substring(stone.engraving.length / 2)
-        })
-    } else {
-        transmuted.push({
-            engraving: String(Number.parseInt(stone.engraving) * 2024)
-        });
+    if(!mutations.has(stone.engraving)) {
+        const transmuted: Stone[] = [];
+        if(stone.engraving === '0') {
+            transmuted.push({
+                engraving: '1'
+            });
+        } else if((stone.engraving.length % 2) === 0) {
+            transmuted.push({
+                engraving: stone.engraving.substring(0, stone.engraving.length / 2)
+            });
+            transmuted.push({
+                engraving: stone.engraving.substring(stone.engraving.length / 2)
+            })
+        } else {
+            transmuted.push({
+                engraving: String(Number.parseInt(stone.engraving) * 2024)
+            });
+        }
+        mutations.set(stone.engraving, transmuted.map(stone => removeLeadingZeroes(stone)));
     }
-    return transmuted.map(stone => removeLeadingZeroes(stone));
+    return mutations.get(stone.engraving)!;
 }
 
 function blink(stones: Stone[]): Stone[] {
@@ -55,21 +59,26 @@ function blink(stones: Stone[]): Stone[] {
     return newStones;
 }
 
-function partOne(input: string[]): number {
-    let stones: Stone[] = parseInput(input);
-    for(let i = 0; i < 25; i++) {
-        stones = blink(stones);
+function rapidBlink(stones: Stone[], times: number) {
+    let blinked: Stone[] = stones;
+    for(let i = 0; i < times; i++) {
+        blinked = blink(blinked);
     }
-    return stones.length;
+    return blinked;
+}
+function partOne(input: string[]): number {
+    return rapidBlink(parseInput(input), 25).length;
 }
 
 function partTwo(input: string[]): number {
-    let stones: Stone[] = parseInput(input);
-    for(let i = 0; i < 75; i++) {
-        stones = blink(stones);
-        debug(`Blink ${i + 1}: ${stones.length}`, day);
-    }
-    return stones.length;
+    // write a function to mutate numbers in N generations
+    // e.g. mutate(engraving, 5);
+    // loop 15 times:
+    //    collect all from the latest generation
+    //    mutate collection another 5 generations
+    //
+    // answer is the # within the last collection
+    return rapidBlink(parseInput(input), 75).length;
 }
 
 test(day, ()=> {
@@ -77,5 +86,5 @@ test(day, ()=> {
     expect(partOne(getExampleInput(day))).toBe(55312);
     expect(partOne(getDayInput(day))).toBe(191690);
 
-    //expect(partTwo(getDayInput(day))).toBe(0);
+    // expect(partTwo(getExampleInput(day))).toBe(0);
 });
