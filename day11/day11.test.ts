@@ -1,90 +1,73 @@
-import { debug, getDayInput, getExampleInput } from '../utils';
+import { getDayInput, getExampleInput } from '../utils';
 
 const day = "day11";
 
-type Stone = {
-    engraving: string;
-}
-
-function parseInput(input: string[]): Stone[] {
+function parseInput(input: string[]): string[] {
     return input.reduce((acc, line) => {
-        acc.push(... line.split(' ')
-                .filter(part => part.trim().length > 0)
-                .map(stone => {
-                    return {
-                        engraving: stone
-                    }
-                }));
+        acc.push(... line.split(' ').filter(part => part.trim().length > 0));
         return acc;
-    }, [] as Stone[]);
+    }, [] as string[]);
 }
 
-function removeLeadingZeroes(stone: Stone): Stone {
-    while(stone.engraving.startsWith('0') && stone.engraving !== '0') {
-        stone.engraving = stone.engraving.substring(1);
+function removeLeadingZeroes(engraving: string): string {
+    while(engraving.startsWith('0') && engraving !== '0') {
+        engraving = engraving.substring(1);
     }
-    return stone;
+    return engraving;
 }
 
-const mutations: Map<string, Stone[]> = new Map<string, Stone[]>();
-function transmute(stone: Stone): Stone[] {
-    if(!mutations.has(stone.engraving)) {
-        const transmuted: Stone[] = [];
-        if(stone.engraving === '0') {
-            transmuted.push({
-                engraving: '1'
-            });
-        } else if((stone.engraving.length % 2) === 0) {
-            transmuted.push({
-                engraving: stone.engraving.substring(0, stone.engraving.length / 2)
-            });
-            transmuted.push({
-                engraving: stone.engraving.substring(stone.engraving.length / 2)
-            })
+const mutations: Map<string, string[]> = new Map<string, string[]>();
+function transmute(engraving: string): string[] {
+    if(!mutations.has(engraving)) {
+        const transmuted: string[] = [];
+        if(engraving === '0') {
+            transmuted.push('1');
+        } else if((engraving.length % 2) === 0) {
+            transmuted.push(engraving.substring(0, engraving.length / 2));
+            transmuted.push(engraving.substring( engraving.length / 2));
         } else {
-            transmuted.push({
-                engraving: String(Number.parseInt(stone.engraving) * 2024)
-            });
+            transmuted.push(String(Number.parseInt(engraving) * 2024));
         }
-        mutations.set(stone.engraving, transmuted.map(stone => removeLeadingZeroes(stone)));
+        mutations.set(engraving, transmuted.map(stone => removeLeadingZeroes(stone)));
     }
-    return mutations.get(stone.engraving)!;
+    return mutations.get(engraving)!;
 }
 
-function blink(stones: Stone[]): Stone[] {
-    const newStones: Stone[] = [];
-    for(let i = 0; i < stones.length; i++) {
-        newStones.push( ...transmute(stones[i]));
-    }
-    return newStones;
+function blink(stones: Map<string, number>): Map<string,number> {
+    // Count the # of times each engraving appears
+    const occurrences: Map<string, number> = new Map();
+    stones.forEach((count, engraving) => {
+        transmute(engraving).forEach(stone => {
+            occurrences.set(stone, (occurrences.get(stone) || 0) + count)
+        });
+    })
+    return occurrences;
 }
 
-function rapidBlink(stones: Stone[], times: number) {
-    let blinked: Stone[] = stones;
+function rapidBlink(stones: string[], times: number): number {
+    let occurrences: Map<string, number> = new Map();
+    stones.forEach(stone => occurrences.set(stone, 1));
     for(let i = 0; i < times; i++) {
-        blinked = blink(blinked);
+        occurrences = blink(occurrences);
     }
-    return blinked;
+    // Sum up all the counts of each engraving
+    return Array.from(occurrences.values()).reduce((acc, count) => {
+        return acc += count;
+    }, 0);
 }
+
 function partOne(input: string[]): number {
-    return rapidBlink(parseInput(input), 25).length;
+    return rapidBlink(parseInput(input), 25);
 }
 
 function partTwo(input: string[]): number {
-    // write a function to mutate numbers in N generations
-    // e.g. mutate(engraving, 5);
-    // loop 15 times:
-    //    collect all from the latest generation
-    //    mutate collection another 5 generations
-    //
-    // answer is the # within the last collection
-    return rapidBlink(parseInput(input), 75).length;
+    return rapidBlink(parseInput(input), 75);
 }
 
 test(day, ()=> {
-    debug(`Day ${day}: ${new Date()}\n`, day, false);
     expect(partOne(getExampleInput(day))).toBe(55312);
     expect(partOne(getDayInput(day))).toBe(191690);
 
-    // expect(partTwo(getExampleInput(day))).toBe(0);
+    expect(partTwo(getExampleInput(day))).toBe(65601038650482);
+    expect(partTwo(getDayInput(day))).toBe(228651922369703);
 });
