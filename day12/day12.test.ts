@@ -1,4 +1,4 @@
-import { debug, getDayInput, getExampleInput } from '../utils';
+import { getDayInput, getExampleInput } from '../utils';
 
 const day = 'day12';
 
@@ -90,10 +90,60 @@ function partOne(input: string[]): number {
     return total;
 }
 
+function countCorners(garden, plot: Plot): number {
+    const friends: Coord[] = [];
+    const foes: Coord[] = [];
+    let corners = 0;
+    for(let x = plot.x - 1; x < plot.x + 2; x++) {
+        for(let y = plot.y - 1; y < plot.y + 2; y++) {
+            if(isInBounds(garden, { x, y }) && garden[x][y].crop === plot.crop) {
+                friends.push({ x, y });
+            } else {
+                foes.push({ x, y });
+            }
+        }
+    }
+    if(foes.length > 0) {    
+        const matcher = (x: number, y: number) => (foe:Coord) => foe.x === x && foe.y === y;
+        const isFriend = (x: number, y: number) => friends.find(matcher(x, y)) !== undefined;
+        const isFoe = (x: number, y: number) => foes.find(matcher(x, y)) !== undefined;
+        corners += isFoe(plot.x - 1, plot.y) && isFoe(plot.x, plot.y - 1) ? 1 : 0;
+        corners += isFoe(plot.x - 1, plot.y) && isFoe(plot.x, plot.y + 1) ? 1 : 0;
+        corners += isFoe(plot.x + 1, plot.y) && isFoe(plot.x, plot.y - 1) ? 1 : 0;
+        corners += isFoe(plot.x + 1, plot.y) && isFoe(plot.x, plot.y + 1) ? 1 : 0;
+        corners += isFoe(plot.x - 1, plot.y - 1) && isFriend(plot.x - 1, plot.y) && isFriend(plot.x, plot.y - 1) ? 1 : 0;
+        corners += isFoe(plot.x - 1, plot.y + 1) && isFriend(plot.x - 1, plot.y) && isFriend(plot.x, plot.y + 1) ? 1 : 0;
+        corners += isFoe(plot.x + 1, plot.y - 1) && isFriend(plot.x + 1, plot.y) && isFriend(plot.x, plot.y - 1) ? 1 : 0;
+        corners += isFoe(plot.x + 1, plot.y + 1) && isFriend(plot.x + 1, plot.y) && isFriend(plot.x, plot.y + 1) ? 1 : 0;
+    }
+    return corners;
+}
+
+function partTwo(input: string[]): number {
+    const garden: Plot[][] = markRegions(parseInput(input));
+    let region = 0;
+    let total = 0;
+    while(true) {
+        const plots: Plot[] = getPlotsForRegion(garden, region);
+        if(plots.length < 1) break;
+        total += plots.length * plots.reduce((acc, plot) => acc + countCorners(garden, plot), 0);
+        region++;
+    }
+    return total;
+}
+
 test(day, () => {
-    debug(`Date: ${new Date()}\n`, day, false);
     expect(partOne(getExampleInput(day, 1))).toBe(140);
     expect(partOne(getExampleInput(day, 2))).toBe(772);
     expect(partOne(getExampleInput(day, 3))).toBe(1930);
+    expect(partOne(getExampleInput(day, 4))).toBe(692);
+    expect(partOne(getExampleInput(day, 5))).toBe(1184);
     expect(partOne(getDayInput(day))).toBe(1375476);
+
+    expect(partTwo(getExampleInput(day, 1))).toBe(80);
+    expect(partTwo(getExampleInput(day, 2))).toBe(436);
+    expect(partTwo(getExampleInput(day, 3))).toBe(1206);
+    expect(partTwo(getExampleInput(day, 4))).toBe(236);
+    expect(partTwo(getExampleInput(day, 5))).toBe(368);
+    expect(partTwo(getDayInput(day))).toBe(821372);
 });
