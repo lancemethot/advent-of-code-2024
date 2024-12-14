@@ -48,6 +48,18 @@ function stepForward(robots: Robot[], steps: number, maxX: number, maxY: number)
     });
 }
 
+function debugRobots(robots: Robot[], maxX: number, maxY: number) {
+    let grid: string = '';
+    for(let y = 0; y <= maxY; y++) {
+        for(let x = 0; x <= maxX; x++) {
+            let count = robots.reduce((acc, robot) => acc += (robot.position.x === x && robot.position.y === y) ? 1 : 0, 0);
+            grid += count === 0 ? '.' : String(count);
+        }
+        grid += '\n';
+    }
+    debug(`Grid:\n${grid}`, day);
+}
+
 function splitIntoQuadrants(robots: Robot[], maxX: number, maxY: number): Robot[][] {
     let width = Math.floor(maxX / 2);
     let height = Math.floor(maxY / 2);
@@ -72,6 +84,35 @@ function partOne(input: string[]): number {
     return calculateSafetyFactory(parseInput(input), 100);
 }
 
+function isInFormation(robots: Robot[], robot: Robot): boolean {
+    let nw = robots.filter(check => check.position.x === robot.position.x - 1 && check.position.y === robot.position.y - 1).length > 0;
+    let n = robots.filter(check => check.position.x === robot.position.x && check.position.y === robot.position.y - 1).length > 0;
+    let ne = robots.filter(check => check.position.x === robot.position.x + 1 && check.position.y === robot.position.y - 1).length > 0;
+    let w = robots.filter(check => check.position.x === robot.position.x - 1 && check.position.y === robot.position.y).length > 0;
+    let e = robots.filter(check => check.position.x === robot.position.x + 1 && check.position.y === robot.position.y).length > 0;
+    let sw = robots.filter(check => check.position.x === robot.position.x - 1 && check.position.y === robot.position.y + 1).length > 0;
+    let s = robots.filter(check => check.position.x === robot.position.x && check.position.y === robot.position.y + 1).length > 0;
+    let se = robots.filter(check => check.position.x === robot.position.x + 1 && check.position.y === robot.position.y + 1).length > 0;
+    return (nw && se) || (ne && sw) || (n && s) || (e && w);
+}
+
+function partTwo(input: string[]): number {
+    let robots: Robot[] = parseInput(input);
+    const maxX = robots.reduce((acc, robot) => Math.max(robot.position.x, acc), 0) + 1;
+    const maxY = robots.reduce((acc, robot) => Math.max(robot.position.y, acc), 0) + 1;
+    let steps = 1;
+    while(true) {
+        robots = stepForward(robots, 1, maxX, maxY);
+        let numInFormation = robots.reduce((acc, robot) => acc += isInFormation(robots, robot) ? 1 : 0, 0);
+        if(numInFormation > robots.length / 2) {
+            return steps;
+        }
+        if(steps > 100000) break;
+        steps++;
+    }
+    return 0;
+}
+
 test(day, () => {
     debug(`Run: ${new Date()}\n`, day, false);
     expect(step({ x: 2, y: 4 }, { x: 2, y: -3 }, 1, 11, 7)).toStrictEqual({ x: 4, y: 1});
@@ -83,5 +124,5 @@ test(day, () => {
     expect(partOne(getExampleInput(day))).toBe(12);
     expect(partOne(getDayInput(day))).toBe(230436441);
 
-
+    expect(partTwo(getDayInput(day))).toBe(8270);
 });
