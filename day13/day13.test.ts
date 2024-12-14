@@ -36,7 +36,13 @@ function parseInput(input: string[]): ClawMachine[] {
 
 function calculateFewestTokens(machine: ClawMachine): number {
     // Solve with linear algebra
-    // Get wholly-divisible button presses for a and b
+    //
+    // Base equations:
+    // X: (a.x * ap) + (b.x * bp) = prize.x
+    // Y: (a.y * ap) + (b.y * bp) = prize.y
+    //
+    // Re-written to solve for both ap and bp:
+
     let ap = ((machine.prize.x * machine.b.y) - (machine.prize.y * machine.b.x)) / ((machine.a.x * machine.b.y) - (machine.a.y * machine.b.x));
     let bp = ((machine.prize.y * machine.a.x) - (machine.prize.x * machine.a.y)) / ((machine.a.x * machine.b.y) - (machine.a.y * machine.b.x));
     if(Number.isInteger(ap) && Number.isInteger(bp)) {
