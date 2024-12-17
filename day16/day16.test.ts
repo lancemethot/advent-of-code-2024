@@ -1,4 +1,4 @@
-import { debug, getDayInput, getExampleInput } from '../utils';
+import { getDayInput, getExampleInput } from '../utils';
 import { HeapItem, MinHeap } from './minheap.test';
 
 const day = 'day16';
@@ -19,6 +19,7 @@ type Tile = Coord & {
 
 type Path = HeapItem & {
     position: Vector;
+    trail: string;
 }
 
 function parseInput(input: string[]): Tile[][] {
@@ -58,8 +59,7 @@ function moves(tiles: Tile[][], position: Vector): Vector[] {
 function dijkstra(tiles: Tile[][], start: Coord): Tile[][] {
     let visited: Tile[][] = tiles.map(line => line.map(tile => { tile.visited = []; return tile; }));
     let heap: MinHeap<Path> = new MinHeap();
-    
-    heap.insert({ size: 0, position: { ... start, direction: '>' } });
+    heap.insert({ size: 0, position: { ... start, direction: '>' }, trail: `${start.x},${start.y}` });
     while(heap.size() > 0) {
         let path = heap.extractMin();
         moves(tiles, path.position).forEach(vector => {
@@ -68,12 +68,16 @@ function dijkstra(tiles: Tile[][], start: Coord): Tile[][] {
                 return (visit.position.direction === vector.direction) ? Math.min(acc, visit.size) : acc;
             }, Number.MAX_VALUE);
             if(distance <= shortestDistance) {
-                visited[vector.x][vector.y].visited.push({ size: distance, position: vector });
-                heap.insert({ size: distance, position: vector });
+                let newPath: Path = {
+                    size: distance,
+                    position: vector,
+                    trail: path.trail + `|${vector.x},${vector.y}`
+                };
+                visited[vector.x][vector.y].visited.push(newPath);
+                heap.insert(newPath);
             }
         });
     }
-
     return visited;
 }
 
@@ -85,21 +89,27 @@ function partOne(input: string[]): number {
     return Math.min(... traversed[exit.x][exit.y].visited.map(visit => visit.size));
 }
 
+function partTwo(input: string[]): number {
+    const tiles: Tile[][] = parseInput(input);
+    const start: Coord = findStart(tiles);
+    const traversed: Tile[][] = dijkstra(parseInput(input), start);
+    const exit: Coord = findExit(tiles);
+    const shortestPath: number = Math.min(... traversed[exit.x][exit.y].visited.map(visit => visit.size));
+    const uniqueTiles: Set<string> = traversed[exit.x][exit.y].visited.reduce((acc, path) => {
+        if(path.size === shortestPath) {
+            path.trail.split('|').forEach(vector => acc.add(vector));
+        }
+        return acc;
+    }, new Set<string>());
+    return uniqueTiles.size;
+}
+
 test(day, () => {
-    debug(`${day}: ${new Date()}\n`, day, false);
     expect(partOne(getExampleInput(day, 1))).toBe(7036);
     expect(partOne(getExampleInput(day, 2))).toBe(11048);
-    expect(partOne(getExampleInput(day, 3))).toBe(21148);
-    //expect(partOne(getExampleInput(day, 4))).toBe(5078);
-    //expect(partOne(getExampleInput(day, 5))).toBe(21110);
-    //expect(partOne(getExampleInput(day, 6))).toBe(41210);
     expect(partOne(getDayInput(day))).toBe(88468);
 
-    // expect(partTwo(getExampleInput(day, 1))).toBe(0);
-    // expect(partTwo(getExampleInput(day, 2))).toBe(0);
-    // expect(partTwo(getExampleInput(day, 3))).toBe(149);
-    // expect(partTwo(getExampleInput(day, 4))).toBe(413);
-    // expect(partTwo(getExampleInput(day, 5))).toBe(264);
-    // expect(partTwo(getExampleInput(day, 6))).toBe(514);
-
+    expect(partTwo(getExampleInput(day, 1))).toBe(45);
+    expect(partTwo(getExampleInput(day, 2))).toBe(64);
+    expect(partTwo(getDayInput(day))).toBe(616);
 });
