@@ -13,40 +13,30 @@ type Registers = {
     c: number;
 }
 
-type Execution = Registers & {
+type Program = Registers & {
+    input: number[];
+}
+
+type Execution = Program & {
     input: number[];
     pointer: number;
     output: string;
 }
 
-function parseInstructions(line: string): Instruction[] {
-    return line.trim().split(',').reduce((acc, instruction, index, instructions) => {
-        if(index % 2 === 1) {
-            acc.push({ 
-                opcode: Number.parseInt(instructions[index - 1]),
-                operand: Number.parseInt(instruction),
-            });
-        }
-        return acc;
-    }, [] as Instruction[] );
-}
-
-function parseInput(input: string[]): Execution[] {
+function parseInput(input: string[]): Program {
     return input.reduce((acc, line, index) => {
         if(line.startsWith('Register A:')) {
             acc.push({
                 a: Number.parseInt(line.split(':')[1].trim()),
                 b: Number.parseInt(input[index+1].split(':')[1].trim()),
                 c: Number.parseInt(input[index+2].split(':')[1].trim()),
-                input: [],
-                pointer: 0,
-                output: '',
+                input: []
             });
         } else if(line.startsWith('Program:')) {
             acc[acc.length - 1].input = line.split(':')[1].trim().split(',').map(i => Number.parseInt(i));
         }
         return acc;
-    }, [] as Execution[]);
+    }, [] as Program[])[0];
 }
 
 function comboOperand(program: Execution, operand: number): number {
@@ -124,30 +114,54 @@ function executeInstruction(program: Execution): Execution {
     }
 }
 
-function executeProgram(program: Execution): Execution {
-    let pointer = program.pointer;
-    while(pointer < program.input.length - 1) {
-        program = executeInstruction(program);
-        pointer = program.pointer;
+function executeProgram(program: Program): Execution {
+    let execution: Execution = { ...program, pointer: 0, output: '' };
+    let pointer = execution.pointer;
+    while(pointer < execution.input.length - 1) {
+        execution = executeInstruction(execution);
+        pointer = execution.pointer;
     }
-    return program;
+    return execution;
+}
+
+function findA(program: Program, a: number = 0, depth: number = 0) {
+    if(depth === program.input.length) return a;
+    for(let i = 0; i < 8; i++) {
+        let output: number = executeProgram({ ... program, a: (a * 8) + i })
+            .output.split(',')
+            .map(n => Number.parseInt(n))[0];
+        if(output < 0) debug(`HUH? a:${(a * 8) + i}`, day);
+        if(output === program.input[program.input.length - 1 - depth]) {
+            let result = findA(program, (a * 8) + i, depth + 1);
+            if(result !== 0) return result;
+        }
+    } 
+    return 0;
 }
 
 function partOne(input: string[]): string {
-    const execution: Execution[] = parseInput(input);
-    return executeProgram(execution[0]).output;
+    return executeProgram(parseInput(input)).output;
+}
+
+function partTwo(input: string[]): number {
+    return findA(parseInput(input));
 }
 
 test(day, () => {
     debug(`${day} ${new Date()}\n`, day, false);
 
-    expect(executeProgram({ a: 0, b: 0, c: 9, input: [ 2, 6 ], output: '', pointer: 0 }).b).toBe(1);
-    expect(executeProgram({ a: 10, b: 0, c: 0, input: [ 5, 0, 5, 1, 5, 4 ], output: '', pointer: 0 }).output).toBe('0,1,2');
-    expect(executeProgram({ a: 2024, b: 0, c: 0, input: [ 0, 1, 5, 4, 3, 0 ], output: '', pointer: 0 }).output).toBe('4,2,5,6,7,7,7,7,3,1,0');
-    expect(executeProgram({ a: 2024, b: 0, c: 0, input: [ 0, 1, 5, 4, 3, 0 ], output: '', pointer: 0 }).a).toBe(0);
-    expect(executeProgram({ a: 0, b: 29, c: 0, input: [ 1, 7 ], output: '', pointer: 0 }).b).toBe(26);
-    expect(executeProgram({ a: 0, b: 2024, c: 43690, input: [ 4, 0 ], output: '', pointer: 0 }).b).toBe(44354);
+    expect(executeProgram({ a: 0,    b: 0,    c: 9,     input: [ 2, 6 ],            }).b).toBe(1);
+    expect(executeProgram({ a: 10,   b: 0,    c: 0,     input: [ 5, 0, 5, 1, 5, 4 ] }).output).toBe('0,1,2');
+    expect(executeProgram({ a: 2024, b: 0,    c: 0,     input: [ 0, 1, 5, 4, 3, 0 ] }).output).toBe('4,2,5,6,7,7,7,7,3,1,0');
+    expect(executeProgram({ a: 2024, b: 0,    c: 0,     input: [ 0, 1, 5, 4, 3, 0 ] }).a).toBe(0);
+    expect(executeProgram({ a: 0,    b: 29,   c: 0,     input: [ 1, 7 ],            }).b).toBe(26);
+    expect(executeProgram({ a: 0,    b: 2024, c: 43690, input: [ 4, 0 ],            }).b).toBe(44354);
 
-    expect(partOne(getExampleInput(day))).toBe('4,6,3,5,6,3,5,2,1,0');
+    expect(partOne(getExampleInput(day, 1))).toBe('4,6,3,5,6,3,5,2,1,0');
     expect(partOne(getDayInput(day))).toBe('7,1,3,7,5,1,0,3,4');
+
+    expect(executeProgram({ a: 117440, b: 0, c: 0, input: [ 0, 3, 5, 4, 3, 0 ] }).output).toBe('0,3,5,4,3,0');
+
+    expect(partTwo(getExampleInput(day, 2))).toBe(117440);
+    expect(partTwo(getDayInput(day))).not.toBe(0);
 });

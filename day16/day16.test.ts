@@ -1,5 +1,4 @@
-import { getDayInput, getExampleInput } from '../utils';
-import { HeapItem, MinHeap } from './minheap.test';
+import { getDayInput, getExampleInput, HeapItem, MinHeap } from '../utils';
 
 const day = 'day16';
 
