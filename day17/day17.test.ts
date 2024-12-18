@@ -81,7 +81,7 @@ function bxc(program: Execution, operand: number): Execution {
 }
 
 function out(program: Execution, operand: number): Execution {
-    let combo = comboOperand(program, operand) % 8;
+    let combo = comboOperand(program, operand) & 7;
     if(program.output.length > 0) program.output += ',';
     program.output += String(combo);
     return program;
@@ -163,5 +163,5 @@ test(day, () => {
     expect(executeProgram({ a: 117440, b: 0, c: 0, input: [ 0, 3, 5, 4, 3, 0 ] }).output).toBe('0,3,5,4,3,0');
 
     expect(partTwo(getExampleInput(day, 2))).toBe(117440);
-    expect(partTwo(getDayInput(day))).not.toBe(0);
+    expect(partTwo(getDayInput(day))).toBe(190384113204239);
 });
