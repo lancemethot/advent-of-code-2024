@@ -75,6 +75,11 @@ function dijkstra(grid: Tile[][], start: Coord): Walk[][] {
     return visited;
 }
 
+function reachable(grid: Tile[][]): boolean {
+    let walked: Walk[][] = dijkstra(grid, { x: 0, y: 0 });
+    return walked[grid.length-1][grid.length-1].size < Number.MAX_VALUE;
+}
+
 function partOne(input: string[], numBytesToDrop: number): number {
     let bytes: Coord[] = parseInput(input);
     let grid: Tile[][] = createGrid(bytes);
@@ -83,9 +88,25 @@ function partOne(input: string[], numBytesToDrop: number): number {
     return walked[grid.length - 1][grid.length - 1].size;
 }
 
+function partTwo(input: string[]): string {
+    let bytes: Coord[] = parseInput(input);
+    let grid: Tile[][] = createGrid(bytes);
+    let index: number = 1;
+    for(index = 1; index < bytes.length; index++) {
+        let dropped: Tile[][] = dropBytes(grid, bytes, index);
+        if(!reachable(dropped)) {
+            break;
+        }
+    }
+    return `${bytes[index - 1].x},${bytes[index - 1].y}`;
+}
+
 test(day, () => {
     debug(`${day} ${new Date()}\n`, day, false);
 
     expect(partOne(getExampleInput(day), 12)).toBe(22);
     expect(partOne(getDayInput(day), 1024)).toBe(246);
+
+    expect(partTwo(getExampleInput(day))).toBe('6,1');
+    expect(partTwo(getDayInput(day))).toBe('22,50');
 });
