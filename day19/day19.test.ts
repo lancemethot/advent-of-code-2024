@@ -20,21 +20,17 @@ function updateMemo(memo: Map<string, number>, design: string, arrangements: num
 }
 
 function arrangements(patterns: Set<string>, design: string, max: number, memo: Map<string, number>): number {
-    // already calculated
-    if(memo.has(design)) return memo.get(design) as number;
-    // nothing to check
-    if(design.length === 0) return 0;
-    // which string is longer, design or max pattern?
+
+    if(memo.has(design)) return memo.get(design) as number; // already determined
+    if(design.length === 0) return 0; // no possible match
+
     let limit = Math.min(design.length, max) + 1;
     for(let i = 0; i < limit; i++) {
-        // check substring
         let check = design.substring(0, i);
         if(patterns.has(check)) {
             if(design.length === i) {
-                // increment design match
                 memo = updateMemo(memo, design, 1);
             } else {
-                // check again with substring
                 let possible = arrangements(patterns, design.substring(i), max, memo);
                 memo = updateMemo(memo, design, possible);
             }
@@ -48,9 +44,7 @@ function arrangements(patterns: Set<string>, design: string, max: number, memo: 
 
 function partOne(input: string[]): number {
     const { patterns, designs } = parseInput(input);
-    let max: number = Array.from(patterns.keys()).reduce((acc, p) => {
-        return Math.max(acc, p.length);
-    }, 0);
+    let max: number = Array.from(patterns.keys()).reduce((acc, p) => Math.max(acc, p.length), 0);
     return designs.reduce((acc, design) => {
         return acc + (arrangements(patterns, design, max, new Map<string, number>()) > 0 ? 1 : 0);
     }, 0);
@@ -58,9 +52,7 @@ function partOne(input: string[]): number {
 
 function partTwo(input: string[]): number {
     const { patterns, designs } = parseInput(input);
-    let max: number = Array.from(patterns.keys()).reduce((acc, p) => {
-        return Math.max(acc, p.length);
-    }, 0);
+    let max: number = Array.from(patterns.keys()).reduce((acc, p) => Math.max(acc, p.length), 0);
     return designs.reduce((acc, design) => {
         return acc + arrangements(patterns, design, max, new Map<string, number>());
     }, 0);
