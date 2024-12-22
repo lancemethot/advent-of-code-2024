@@ -134,11 +134,12 @@ function operateRobot(codes: string[], keypad: Button[][], memo: Map<string, str
     }, [] as string[]);
 }
 
-function enterCode(code: string, numericKeypad: Button[][], directionKeypad: Button[][], memo: Map<string, string[]>): string {
-    let sequencesForDoor: string[] = determineSequences(code, numericKeypad, memo);
-    let sequencesForDoorRobot: string[] = operateRobot(sequencesForDoor, directionKeypad, memo);
-    let sequencesForProxyRobot: string[] = operateRobot(sequencesForDoorRobot, directionKeypad, memo);
-    return sequencesForProxyRobot.sort((a, b) => a.length - b.length)[0];
+function enterCode(code: string, numericKeypad: Button[][], directionKeypad: Button[][], memo: Map<string, string[]>, depth: number): string {
+    let sequences: string[] = determineSequences(code, numericKeypad, memo);
+    for(let i = 0; i < depth; i++) {
+        sequences = operateRobot(sequences, directionKeypad, memo);
+    }
+    return sequences.sort((a, b) => a.length - b.length)[0];
 }
 
 function partOne(input: string[]): number {
@@ -146,7 +147,17 @@ function partOne(input: string[]): number {
     const directionKeypad: Button[][] = getKeypad([" ^A", "<v>"]);
     const memo: Map<string, string[]> = new Map<string, string[]>();
     return input.reduce((acc, code) => {
-        let sequence = enterCode(code, numericKeypad, directionKeypad, memo);
+        let sequence = enterCode(code, numericKeypad, directionKeypad, memo, 2);
+        return acc + (sequence.length * Number.parseInt(code.substring(0, code.length - 1)));
+    }, 0);
+}
+
+function partTwo(input: string[]): number {
+    const numericKeypad: Button[][] = getKeypad([ "789", "456", "123", " 0A"]);
+    const directionKeypad: Button[][] = getKeypad([" ^A", "<v>"]);
+    const memo: Map<string, string[]> = new Map<string, string[]>();
+    return input.reduce((acc, code) => {
+        let sequence = enterCode(code, numericKeypad, directionKeypad, memo, 25);
         return acc + (sequence.length * Number.parseInt(code.substring(0, code.length - 1)));
     }, 0);
 }
@@ -155,5 +166,7 @@ test(day, () => {
     debug(`[**${day}**] - ${new Date()}\n`, day, false);
 
     expect(partOne(getExampleInput(day))).toBe(126384);
-    expect(partOne(getDayInput(day))).toBe(0);
+    expect(partOne(getDayInput(day))).toBe(176650);
+
+    //expect(partTwo(getDayInput(day))).toBe(0);
 });

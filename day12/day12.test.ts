@@ -90,7 +90,7 @@ function partOne(input: string[]): number {
     return total;
 }
 
-function countCorners(garden, plot: Plot): number {
+function countCorners(garden: Plot[][], plot: Plot): number {
     const friends: Coord[] = [];
     const foes: Coord[] = [];
     let corners = 0;
