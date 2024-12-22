@@ -124,7 +124,7 @@ function executeProgram(program: Program): Execution {
     return execution;
 }
 
-function findA(program: Program, a: number = 0, depth: number = 0) {
+function findA(program: Program, a: number = 0, depth: number = 0): number {
     if(depth === program.input.length) return a;
     for(let i = 0; i < 8; i++) {
         let output: number = executeProgram({ ... program, a: (a * 8) + i })
