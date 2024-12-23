@@ -100,6 +100,18 @@ function partOne(input: string[]): number {
     }).length;
 }
 
+function partTwo(input: string[]): string {
+    let password: string = '';
+    let connections: Connection[] = parseInput(input);
+    let k: number = 2;
+    let networks: string[] = determineNetworks(connections, k);
+    while(networks.length > 0) {
+        password = networks[0].split(',').sort((a, b) => a.localeCompare(b)).join(',');
+        networks = determineNetworks(connections, ++k);
+    }
+    return password;
+}
+
 test(day, ()=> {
     debug(`[**${day}**] ${new Date()}\n\n`, day, false);
 
@@ -107,4 +119,7 @@ test(day, ()=> {
 
     expect(partOne(getExampleInput(day))).toBe(7);
     expect(partOne(getDayInput(day))).toBe(1327);
+
+    expect(partTwo(getExampleInput(day))).toBe("co,de,ka,ta");
+    expect(partTwo(getDayInput(day))).toBe("df,kg,la,mp,pb,qh,sk,th,vn,ww,xp,yp,zk");
 })
