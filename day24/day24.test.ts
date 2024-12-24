@@ -86,6 +86,8 @@ function partOne(input: string[]): number {
     return Number.parseInt(zout, 2);
 }
 
+// Add comments
+// full adder
 function partTwo(input: string[]): string {
     const { wires, gates } = parseInput(input);
     const badGates: Set<string> = new Set<string>();

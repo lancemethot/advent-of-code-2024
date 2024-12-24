@@ -1,164 +1,180 @@
-import { debug, getDayInput, getExampleInput, HeapItem, MinHeap } from '../utils';
+import { debug, getDayInput, getExampleInput } from '../utils';
 
 const day = 'day21';
 
-type Coord = {
-    x: number;
-    y: number;
-}
+const pairMemo: Map<string, string> = new Map();
+pairMemo.set('A0', '<A');
+pairMemo.set('0A', '>A');
+pairMemo.set('A1', '^<<A');
+pairMemo.set('1A', '>>vA');
+pairMemo.set('A2', '<^A');
+pairMemo.set('2A', 'v>A');
+pairMemo.set('A3', '^A');
+pairMemo.set('3A', 'vA');
+pairMemo.set('A4', '^^<<A');
+pairMemo.set('4A', '>>vvA');
+pairMemo.set('A5', '<^^A');
+pairMemo.set('5A', 'vv>A');
+pairMemo.set('A6', '^^A');
+pairMemo.set('6A', 'vvA');
+pairMemo.set('A7', '^^^<<A');
+pairMemo.set('7A', '>>vvvA');
+pairMemo.set('A8', '<^^^A');
+pairMemo.set('8A', 'vvv>A');
+pairMemo.set('A9', '^^^A');
+pairMemo.set('9A', 'vvvA');
+pairMemo.set('01', '^<A');
+pairMemo.set('10', '>vA');
+pairMemo.set('02', '^A');
+pairMemo.set('20', 'vA');
+pairMemo.set('03', '^>A');
+pairMemo.set('30', '<vA');
+pairMemo.set('04', '^<^A');
+pairMemo.set('40', '>vvA');
+pairMemo.set('05', '^^A');
+pairMemo.set('50', 'vvA');
+pairMemo.set('06', '^^>A');
+pairMemo.set('60', '<vvA');
+pairMemo.set('07', '^^^<A');
+pairMemo.set('70', '>vvvA');
+pairMemo.set('08', '^^^A');
+pairMemo.set('80', 'vvvA');
+pairMemo.set('09', '^^^>A');
+pairMemo.set('90', '<vvvA');
+pairMemo.set('12', '>A');
+pairMemo.set('21', '<A');
+pairMemo.set('13', '>>A');
+pairMemo.set('31', '<<A');
+pairMemo.set('14', '^A');
+pairMemo.set('41', 'vA');
+pairMemo.set('15', '^>A');
+pairMemo.set('51', '<vA');
+pairMemo.set('16', '^>>A');
+pairMemo.set('61', '<<vA');
+pairMemo.set('17', '^^A');
+pairMemo.set('71', 'vvA');
+pairMemo.set('18', '^^>A');
+pairMemo.set('81', '<vvA');
+pairMemo.set('19', '^^>>A');
+pairMemo.set('91', '<<vvA');
+pairMemo.set('23', '>A');
+pairMemo.set('32', '<A');
+pairMemo.set('24', '<^A');
+pairMemo.set('42', 'v>A');
+pairMemo.set('25', '^A');
+pairMemo.set('52', 'vA');
+pairMemo.set('26', '^>A');
+pairMemo.set('62', '<vA');
+pairMemo.set('27', '<^^A');
+pairMemo.set('72', 'vv>A');
+pairMemo.set('28', '^^A');
+pairMemo.set('82', 'vvA');
+pairMemo.set('29', '^^>A');
+pairMemo.set('92', '<vvA');
+pairMemo.set('34', '<<^A');
+pairMemo.set('43', 'v>>A');
+pairMemo.set('35', '<^A');
+pairMemo.set('53', 'v>A');
+pairMemo.set('36', '^A');
+pairMemo.set('63', 'vA');
+pairMemo.set('37', '<<^^A');
+pairMemo.set('73', 'vv>>A');
+pairMemo.set('38', '<^^A');
+pairMemo.set('83', 'vv>A');
+pairMemo.set('39', '^^A');
+pairMemo.set('93', 'vvA');
+pairMemo.set('45', '>A');
+pairMemo.set('54', '<A');
+pairMemo.set('46', '>>A');
+pairMemo.set('64', '<<A');
+pairMemo.set('47', '^A');
+pairMemo.set('74', 'vA');
+pairMemo.set('48', '^>A');
+pairMemo.set('84', '<vA');
+pairMemo.set('49', '^>>A');
+pairMemo.set('94', '<<vA');
+pairMemo.set('56', '>A');
+pairMemo.set('65', '<A');
+pairMemo.set('57', '<^A');
+pairMemo.set('75', 'v>A');
+pairMemo.set('58', '^A');
+pairMemo.set('85', 'vA');
+pairMemo.set('59', '^>A');
+pairMemo.set('95', '<vA');
+pairMemo.set('67', '<<^A');
+pairMemo.set('76', 'v>>A');
+pairMemo.set('68', '<^A');
+pairMemo.set('86', 'v>A');
+pairMemo.set('69', '^A');
+pairMemo.set('96', 'vA');
+pairMemo.set('78', '>A');
+pairMemo.set('87', '<A');
+pairMemo.set('79', '>>A');
+pairMemo.set('97', '<<A');
+pairMemo.set('89', '>A');
+pairMemo.set('98', '<A');
+pairMemo.set('<^', '>^A');
+pairMemo.set('^<', 'v<A');
+pairMemo.set('<v', '>A');
+pairMemo.set('v<', '<A');
+pairMemo.set('<>', '>>A');
+pairMemo.set('><', '<<A');
+pairMemo.set('<A', '>>^A');
+pairMemo.set('A<', 'v<<A');
+pairMemo.set('^v', 'vA');
+pairMemo.set('v^', '^A');
+pairMemo.set('^>', 'v>A');
+pairMemo.set('>^', '<^A');
+pairMemo.set('^A', '>A');
+pairMemo.set('A^', '<A');
+pairMemo.set('v>', '>A');
+pairMemo.set('>v', '<A');
+pairMemo.set('vA', '^>A');
+pairMemo.set('Av', '<vA');
+pairMemo.set('>A', '^A');
+pairMemo.set('A>', 'vA');
 
-type Vector = Coord & {
-    direction: string;
-}
-
-type Walk = Button & {
-    paths: Path[];
-};
-
-type Path = Vector & HeapItem & {
-    trail: string;
-    directionChanges: number;
-}
-
-type Presses = HeapItem & {
-    code: string;
-    sequence: string;
-}
-
-type Button = Coord & {
-    label: string;
-}
-
-function getKeypad(layout: string[]): Button [][] {
-    return layout.reduce((acc, line, x) => {
-        acc.push(line.split('').map((label, y) => { return { x, y, label } as Button}));
-        return acc;
-    }, [] as Button[][]);
-}
-
-function findButton(keypad: Button[][], label: string): Button {
-    return keypad.reduce((acc, row, x) => {
-        return row.reduce((acc, col, y) => { return col.label === label ? col : acc; }, acc);
-    }, { x: 0, y: 0, label: "A" } as Button);
-}
-
-function isInBounds(keypad: Button[][], position: Coord): boolean {
-    return position.x >= 0 && position.y >= 0 && position.x < keypad.length && position.y < keypad[0].length;
-}
-
-function moves(keypad: Button[][], position: Coord): Vector[] {
-    return [
-        { x: position.x, y: position.y - 1, direction: '<' },
-        { x: position.x - 1, y: position.y, direction: '^' },
-        { x: position.x + 1, y: position.y, direction: 'v' },
-        { x: position.x, y: position.y + 1, direction: '>' }
-    ].filter(coord => isInBounds(keypad, coord))
-     .filter(coord => keypad[coord.x][coord.y].label !== ' ');
-}
-
-function dijkstra(keypad: Button[][], start: Button, end: Button, memo: Map<string, string[]>): string [] {
-    let key: string = `${start.label} ${end.label}`;
-
-    if(memo.has(key)) return memo.get(key)!;
-    if(start.label === end.label) { memo.set(key, [ "A" ]); return memo.get(key)!; }
-
-    let visited: Walk[][] = keypad.map(row => row.map(button => { return { ...button, paths: [] } as Walk }));
-
-    let heap: MinHeap<Path> = new MinHeap();
-    moves(keypad, start).forEach(move => {
-        heap.insert({ ... start, direction: move.direction, trail: '', size: 0, directionChanges: 0 });
-    });
-
-    while(heap.size() > 0) {
-        let path = heap.extractMin();
-        let distance = path.size + 1;
-        moves(keypad, path).forEach(move => {
-            let shortestPath: number = visited[move.x][move.y].paths.reduce((acc, path) => {
-                return Math.min(acc, path.size);
-            }, Number.MAX_VALUE);
-            if(distance <= shortestPath) {
-                let previousDirection = path.trail.length === 0 ? move.direction : path.trail[path.trail.length - 1];
-                let directionChanges = path.directionChanges + (previousDirection !== move.direction ? 1 : 0);
-                if(directionChanges < 2) {
-                    let p: Path = { ...move, size: distance, trail: path.trail + move.direction, directionChanges };
-                    visited[move.x][move.y].paths.push(p);
-                    heap.insert(p);
-                }
-            }
-        });
+const sequenceMap: Map<string, number> = new Map();
+function getSequenceLength(sequence: string, depth: number): number {
+    let key: string = `${sequence}-D${depth}`;
+    if(sequenceMap.has(key)) {
+        return sequenceMap.get(key)!;
     }
 
-    let shortest: number = visited[end.x][end.y].paths.reduce((acc, path) => Math.min(acc, path.size), Number.MAX_VALUE);
-    let sequences: string[] = visited[end.x][end.y].paths.filter(path => path.size === shortest).map(path => path.trail + 'A');
-    memo.set(key, Array.from(new Set(sequences)));
-    return memo.get(key)!;
-}
-
-function determineSequences(code: string, keypad: Button[][], memo: Map<string, string[]>): string [] {
-    if(memo.has(code)) return memo.get(code)!;
-    let sequences: string[] = [];
-    let heap: MinHeap<Presses> = new MinHeap<Presses>();
-    heap.insert({ code: 'A'+code, size: 0, sequence: '' });
-    while(heap.size() > 0) {
-        let presses: Presses = heap.extractMin();
-        if(presses.size === presses.code.length - 1) { sequences.push(presses.sequence); continue; }
-        let current: Button = findButton(keypad, presses.code.charAt(presses.size));
-        let next: Button = findButton(keypad, presses.code.charAt(presses.size + 1));
-        dijkstra(keypad, current, next, memo).forEach(sequence => {
-            heap.insert({ code: presses.code, size: presses.size + 1, sequence: presses.sequence + sequence });
-        });
+    let length: number = 0;
+    if(depth === 0) {
+        length = sequence.length;
+    } else {
+        let current: string = 'A';
+        for(let i = 0; i < sequence.length; i++) {
+            let next: string = sequence[i];
+            let len: number = getMoveCount(current, next, depth);
+            current = next;
+            length += len;
+        }
     }
-    let shortest: number = sequences.reduce((acc, sequence) => Math.min(acc, sequence.length), Number.MAX_VALUE);
-    memo.set(code, sequences.filter(sequence => sequence.length === shortest));
-    return memo.get(code)!;
+
+    sequenceMap.set(key, length);
+    return length;
 }
 
-function operateRobot(codes: string[], keypad: Button[][], memo: Map<string, string[]>): string[] {
-    return codes.reduce((acc, code) => {
-        let parts: string[] = code.split('A');
-        parts.pop();
-        let sequences: string[] = [];
-        parts.forEach(part => {
-            let seqs: string[] = determineSequences(part + 'A', keypad, memo);
-            if(sequences.length === 0) sequences.push(... seqs);
-            else {
-                let old: string[] = [ ... sequences ];
-                sequences = seqs.reduce((acc, seq) => {
-                    acc.push(... old.map(o => `${o}${seq}`));
-                    return acc;
-                }, [] as string[]);
-            }
-        });
-        acc.push(... sequences);
-        return acc;
-    }, [] as string[]);
-}
-
-function enterCode(code: string, numericKeypad: Button[][], directionKeypad: Button[][], memo: Map<string, string[]>, depth: number): string {
-    let sequences: string[] = determineSequences(code, numericKeypad, memo);
-    for(let i = 0; i < depth; i++) {
-        sequences = operateRobot(sequences, directionKeypad, memo);
-    }
-    return sequences.sort((a, b) => a.length - b.length)[0];
+function getMoveCount(current: string, next: string, depth: number): number {
+    if(current === next) return 1;
+    let sequence: string = pairMemo.get(`${current}${next}`)!;
+    return getSequenceLength(sequence, depth - 1);
 }
 
 function partOne(input: string[]): number {
-    const numericKeypad: Button[][] = getKeypad([ "789", "456", "123", " 0A"]);
-    const directionKeypad: Button[][] = getKeypad([" ^A", "<v>"]);
-    const memo: Map<string, string[]> = new Map<string, string[]>();
     return input.reduce((acc, code) => {
-        let sequence = enterCode(code, numericKeypad, directionKeypad, memo, 2);
-        return acc + (sequence.length * Number.parseInt(code.substring(0, code.length - 1)));
+        let sequence: number = getSequenceLength(code, 3);
+        return acc + (sequence * Number.parseInt(code.substring(0, code.length - 1)));
     }, 0);
 }
 
 function partTwo(input: string[]): number {
-    const numericKeypad: Button[][] = getKeypad([ "789", "456", "123", " 0A"]);
-    const directionKeypad: Button[][] = getKeypad([" ^A", "<v>"]);
-    const memo: Map<string, string[]> = new Map<string, string[]>();
     return input.reduce((acc, code) => {
-        let sequence = enterCode(code, numericKeypad, directionKeypad, memo, 25);
-        return acc + (sequence.length * Number.parseInt(code.substring(0, code.length - 1)));
+        let length = getSequenceLength(code, 26);
+        return acc + (length * Number.parseInt(code.substring(0, code.length - 1)));
     }, 0);
 }
 
@@ -168,5 +184,6 @@ test(day, () => {
     expect(partOne(getExampleInput(day))).toBe(126384);
     expect(partOne(getDayInput(day))).toBe(176650);
 
-    //expect(partTwo(getDayInput(day))).toBe(0);
+    expect(partTwo(getExampleInput(day))).toBe(154115708116294);
+    expect(partTwo(getDayInput(day))).toBe(217698355426872);
 });
