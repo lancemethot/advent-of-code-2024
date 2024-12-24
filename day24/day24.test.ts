@@ -57,9 +57,8 @@ function partOne(input: string[]): number {
     const output: Map<string, number | null> = simulate(wires, gates);
     let zout: string = Array.from(output.keys())
         .filter(wire => wire.startsWith('z'))
-        .sort((a,b) => a.localeCompare(b))
+        .sort((a,b) => b.localeCompare(a))
         .map(wire => `${output.get(wire)!}`)
-        .reverse()
         .join('');
     return Number.parseInt(zout, 2);
 }
