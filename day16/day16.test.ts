@@ -1,4 +1,5 @@
-import { getDayInput, getExampleInput, HeapItem, MinHeap } from '../utils';
+import { getDayInput, getExampleInput } from 'advent-of-code-utils';
+import { HeapItem, MinHeap } from 'advent-of-code-utils';
 
 const day = 'day16';
 
