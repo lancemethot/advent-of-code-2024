@@ -3,3 +3,4 @@ debug.log
 *.debug
 newday.sh
 .DS_Store
+dist
